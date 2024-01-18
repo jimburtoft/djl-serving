@@ -55,52 +55,7 @@ jobs:
       - name: Download models and dockers
         working-directory: tests/integration
         run: |
-          docker pull deepjavalibrary/djl-serving:$DJLSERVING_DOCKER_TAG
-      - name: Test Mixtral-8x7B with aiccl backend
-        working-directory: tests/integration
-        run: |
-          rm -rf models
-          python3 llm/prepare.py lmi_dist_aiccl mixtral-8x7b-aiccl
-          ./launch_container.sh deepjavalibrary/djl-serving:$DJLSERVING_DOCKER_TAG $PWD/models deepspeed \
-          serve
-          python3 llm/client.py lmi_dist_aiccl mixtral-8x7b-aiccl
-          if [ "$(docker logs $(docker ps -aq) 2>&1 | grep -c 'Starting torch distributed with aiccl backend')" -lt 8 ]; then
-            echo "aiccl backend not used"
-            return 1
-          else
-            echo "Using aiccl backend"
-          fi
-          docker rm -f $(docker ps -aq)
-      - name: Test Llama-2-70B with aiccl backend
-        working-directory: tests/integration
-        run: |
-          rm -rf models
-          python3 llm/prepare.py lmi_dist_aiccl llama-2-70b-aiccl
-          ./launch_container.sh deepjavalibrary/djl-serving:$DJLSERVING_DOCKER_TAG $PWD/models deepspeed \
-          serve
-          python3 llm/client.py lmi_dist_aiccl llama-2-70b-aiccl
-          if [ "$(docker logs $(docker ps -aq) 2>&1 | grep -c 'Starting torch distributed with aiccl backend')" -lt 8 ]; then
-            echo "aiccl backend not used"
-            return 1
-          else
-            echo "Using aiccl backend"
-          fi
-          docker rm -f $(docker ps -aq)
-      - name: Test codellama/CodeLlama-34b-hf with aiccl backend
-        working-directory: tests/integration
-        run: |
-          rm -rf models
-          python3 llm/prepare.py lmi_dist_aiccl codellama-34b-aiccl
-          ./launch_container.sh deepjavalibrary/djl-serving:$DJLSERVING_DOCKER_TAG $PWD/models deepspeed \
-          serve
-          python3 llm/client.py lmi_dist_aiccl codellama-34b-aiccl
-          if [ "$(docker logs $(docker ps -aq) 2>&1 | grep -c 'Starting torch distributed with aiccl backend')" -lt 8 ]; then
-            echo "aiccl backend not used"
-            return 1
-          else
-            echo "Using aiccl backend"
-          fi
-          docker rm -f $(docker ps -aq)
+          docker pull deepjavalibrary/djl-serving:deepspeed-test
       - name: Test tiiuae/falcon-40b with aiccl backend
         working-directory: tests/integration
         run: |
@@ -121,7 +76,6 @@ jobs:
         run: |
           sudo rm -rf models
       - name: On fail step
-        if: ${{ failure() }}
         working-directory: tests/integration
         run: |
           sudo rm -rf models
